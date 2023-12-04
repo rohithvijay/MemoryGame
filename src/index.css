@@ -2,6 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+body {
+  margin: 0;
+  font-family: "Louis Vuitton Regular";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
 .home-bg {
   background: url('./assets/game.jpg');
 }
@@ -58,6 +64,9 @@
   background-color: #ffcd9a;
   transform: rotateY(180deg);
 }
-.bg-game-cover {
+.bg-game-cover1 {
   background: url('./assets/game2.jpg');
+}
+.bg-game-cover3 {
+  background: url('./assets/hard-level.jpg');
 }
