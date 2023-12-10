@@ -18,6 +18,8 @@ const GameMedium = () => {
   const [cards, setCards] = useState(tempGameData);
   const [clickedCards, setClickedCards] = useState([]);
   const [timer, setTimer] = useState(40);
+  const [timerInterval, setTimerInterval] = useState(null);
+  const [gameWon, setGameWon] = useState(false);
   const handleCardClick = (id) => {
     const clickedCard = cards.find((card) => card.id === id);
 
@@ -29,14 +31,6 @@ const GameMedium = () => {
       setCards(updatedCards);
     }
   };
-  const playAgain = () => {
-    setCards(gameData.mediumCards);
-    setTimer(40);
-    const interval = setInterval(() => {
-      TimerCheck(interval);
-    }, 1000);
-    return () => clearInterval(interval);
-  };
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -47,14 +41,24 @@ const GameMedium = () => {
           );
           setCards(updatedCards);
         } else {
-          let filteredElements = cards.filter((card) => !card.isRotated);
-          setCards(filteredElements);
+          const updatedCards = cards.map((card) =>
+            clickedCards.some((clicked) => clicked.id === card.id)
+              ? { ...card, isMatched: true }
+              : card
+          );
+          setCards(updatedCards);
           toast.success("Match Found! Good Work", {
             position: toast.POSITION.TOP_CENTER,
             autoClose: 500,
           });
         }
         setClickedCards([]);
+      } else if(cards.length > 0){
+        const allCardsMatched = cards.every((card) => card.isMatched);
+        if (allCardsMatched) {
+          setGameWon(true);
+          setCards([]);
+        }
       }
     }, 500); // Adjust the delay time as needed
 
@@ -66,13 +70,17 @@ const GameMedium = () => {
     setCards((prevCards) => [...prevCards].sort(() => Math.random() - 0.5));
   }, []);
 
-  //timer
-  useEffect(() => {
-    const interval = setInterval(() => {
-      TimerCheck(interval);
+  const playAgain = () => {
+    setCards(gameData.mediumCards);
+    setTimer(40);
+    if (timerInterval) {
+      clearInterval(timerInterval); // Clear the previous interval
+    }
+    const newInterval = setInterval(() => {
+      TimerCheck(newInterval);
     }, 1000);
-    return () => clearInterval(interval);
-  }, []);
+    setTimerInterval(newInterval);
+  };
 
   const TimerCheck = (interval) => {
     setTimer((prevTimer) => {
@@ -81,10 +89,20 @@ const GameMedium = () => {
       } else {
         setCards([]);
         clearInterval(interval);
+        setTimerInterval(null);
         return 0;
       }
     });
   };
+
+  useEffect(() => {
+    const initialInterval = setInterval(() => {
+      TimerCheck(initialInterval);
+    }, 1000);
+    setTimerInterval(initialInterval);
+
+    return () => clearInterval(initialInterval);
+  }, []); // Run this effect only once on mount
 
   // Convert seconds to MM:SS format
   const formatTime = (time) => {
@@ -109,23 +127,24 @@ const GameMedium = () => {
           <FontAwesomeIcon icon={faClock} /> {formatTime(timer)}
         </div>
         <div className="card-inner">
-          <div className="py-5 sm:py-20 px-5 grid grid-cols-4 md:px-2 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-4 gap-4 md:gap-x-36 md:gap-y-12 justify-center text-center tech">
+          <div className="py-5 sm:py-20 px-5 grid grid-cols-4 md:px-2 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-4 gap-4 md:gap-x-36 md:gap-y-12 justify-center text-center">
             {cards.map((card, index) => (
               <div
                 className={`card ${
                   card.isRotated ? "is-flipped" : ""
-                } m-h-64 text-3xl sm:text-5xl h-20 w-20 sm:h-24 sm:w-24 text-gray-800 shadow-lg   text-center cursor-pointer relative`}
+                } m-h-64 text-3xl sm:text-5xl h-20 w-20 sm:h-24 sm:w-24 text-gray-800 shadow-lg   text-center cursor-pointer relative
+                ${card.isMatched ? "matched" : ""}`}
                 key={card.id}
                 onClick={() => handleCardClick(card.id)}
               >
-                <CardBlock icon= {card.icon}/>
+                <CardBlock icon={card.icon} />
               </div>
             ))}
           </div>
         </div>
       </div>
     </div>
-  ) : timer > 0 ? (
+  ) : gameWon  ? (
     /* Content to render when timer > 0 */
     <div>
       <Link
@@ -136,7 +155,7 @@ const GameMedium = () => {
       </Link>
       <div className="flex flex-col items-center justify-center h-screen bg-game-cover1 bg-cover min-h-screen">
         <FontAwesomeIcon icon={faSmileBeam} className="text-white text-5xl" />
-        <h1 className="text-white font-bold text-5xl mb-10">Hurray !!!</h1>
+        <h1 className="text-white font-bold text-5xl mb-10">Congrats !!!</h1>
         <button
           className="flex items-center p-5 bg-customWood rounded-full animate-scale"
           onClick={() => playAgain()}
@@ -145,7 +164,9 @@ const GameMedium = () => {
             icon={faPlayCircle}
             className="text-white text-5xl"
           />
-          <h2 className="font-bold text-2xl lg:text-5xl text-white pl-5">PLAY AGAIN</h2>
+          <h2 className="font-bold text-2xl lg:text-5xl text-white pl-5">
+            PLAY AGAIN
+          </h2>
         </button>
       </div>
     </div>
@@ -168,7 +189,9 @@ const GameMedium = () => {
             icon={faPlayCircle}
             className="text-white text-5xl"
           />
-          <h2 className="font-bold text-2xl lg:text-5xl text-white pl-5">PLAY AGAIN</h2>
+          <h2 className="font-bold text-2xl lg:text-5xl text-white pl-5">
+            PLAY AGAIN
+          </h2>
         </button>
       </div>
     </div>

@@ -70,3 +70,23 @@ body {
 .bg-game-cover3 {
   background: url('./assets/hard-level.jpg');
 }
+.matched {
+  animation-name: myAnimation;
+    animation-duration: 2000ms;
+    animation-fill-mode: forwards;
+}
+@keyframes myAnimation{
+  0%{
+    opacity: 1;
+    transform: rotateX(90deg);
+  }
+  50%{
+    opacity: 0.5;
+    transform: rotateX(0deg);
+  }
+  100%{
+    visibility: hidden;
+    opacity: 0;
+    transform: rotateX(90deg);
+  }
+}
